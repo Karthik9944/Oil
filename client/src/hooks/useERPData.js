@@ -1,0 +1,730 @@
+import { useEffect, useState } from 'react';
+
+const STORAGE_KEY = 'sri_nikil_erp_db';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
+const defaultProducts = [
+  { id: 1, code: 'GNR-15K', name: 'Groundnut Oil (Refined) 15kg Tin', cat: 'Groundnut', unit: 'tins', price: 2920, stock: 15, sold: 0, image: 'https://placehold.co/150x150?text=15kg+Tin' },
+  { id: 2, code: 'GNR-05C', name: 'Groundnut Oil (Refined) 5L Can', cat: 'Groundnut', unit: 'cans', price: 930, stock: 10, sold: 0, image: 'https://placehold.co/150x150?text=5L+Can' },
+  { id: 3, code: 'GNR-02C', name: 'Groundnut Oil (Refined) 2L Can', cat: 'Groundnut', unit: 'cans', price: 383, stock: 15, sold: 0, image: 'https://placehold.co/150x150?text=2L+Can' },
+  { id: 4, code: 'GNR-01B', name: 'Groundnut Oil (Refined) 1L Bottle', cat: 'Groundnut', unit: 'bottles', price: 188, stock: 30, sold: 0, image: 'https://placehold.co/150x150?text=1L+Bottle' },
+  { id: 5, code: 'GNR-01P', name: 'Groundnut Oil (Refined) 1L Packet', cat: 'Groundnut', unit: 'pkts', price: 184, stock: 50, sold: 0, image: 'https://placehold.co/150x150?text=1L+Packet' },
+  { id: 6, code: 'GNR-HFP', name: 'Groundnut Oil (Refined) 1/2L Packet', cat: 'Groundnut', unit: 'pkts', price: 92, stock: 0, sold: 0, image: 'https://placehold.co/150x150?text=Half+L+Pkt' },
+  { id: 7, code: 'GNP-15K', name: 'Groundnut Oil (Pure) 15kg Tin', cat: 'Groundnut', unit: 'tins', price: 3000, stock: 8, sold: 0, image: 'https://placehold.co/150x150?text=15kg+Tin' },
+  { id: 8, code: 'GNP-05C', name: 'Groundnut Oil (Pure) 5L Can', cat: 'Groundnut', unit: 'cans', price: 955, stock: 10, sold: 0, image: 'https://placehold.co/150x150?text=5L+Can' },
+  { id: 9, code: 'GNP-01P', name: 'Groundnut Oil (Pure) 1L Packet', cat: 'Groundnut', unit: 'pkts', price: 193, stock: 40, sold: 0, image: 'https://placehold.co/150x150?text=1L+Packet' },
+  { id: 10, code: 'SFR-15K', name: 'Sunflower Oil (Refined) 15kg Tin', cat: 'Sunflower', unit: 'tins', price: 2950, stock: 12, sold: 0, image: 'https://placehold.co/150x150?text=15kg+Tin' },
+  { id: 11, code: 'SFR-05C', name: 'Sunflower Oil (Refined) 5L Can', cat: 'Sunflower', unit: 'cans', price: 940, stock: 15, sold: 0, image: 'https://placehold.co/150x150?text=5L+Can' },
+  { id: 12, code: 'SFR-01P', name: 'Sunflower Oil (Refined) 1L Packet', cat: 'Sunflower', unit: 'pkts', price: 186, stock: 85, sold: 0, image: 'https://placehold.co/150x150?text=1L+Packet' },
+  { id: 13, code: 'PAL-15K', name: 'Palm Oil 15kg Tin', cat: 'Palm', unit: 'tins', price: 2445, stock: 24, sold: 0, image: 'https://placehold.co/150x150?text=15kg+Tin' },
+  { id: 14, code: 'PAL-05C', name: 'Palm Oil 5L Can', cat: 'Palm', unit: 'cans', price: 780, stock: 20, sold: 0, image: 'https://placehold.co/150x150?text=5L+Can' },
+  { id: 15, code: 'PAL-01P', name: 'Palm Oil 1L Packet', cat: 'Palm', unit: 'pkts', price: 154, stock: 60, sold: 0, image: 'https://placehold.co/150x150?text=1L+Packet' },
+  { id: 16, code: 'VAN-15K', name: 'Vanaspati 15kg Tin', cat: 'Vanaspati', unit: 'tins', price: 2700, stock: 5, sold: 0, image: 'https://placehold.co/150x150?text=15kg+Tin' },
+  { id: 17, code: 'SEM-01P', name: 'Sesame Oil (Mayil) 1L Packet', cat: 'Sesame', unit: 'pkts', price: 320, stock: 20, sold: 0, image: 'https://placehold.co/150x150?text=1L+Packet' },
+  { id: 18, code: 'SEM-HFP', name: 'Sesame Oil (Mayil) 1/2L Packet', cat: 'Sesame', unit: 'pkts', price: 160, stock: 25, sold: 0, image: 'https://placehold.co/150x150?text=Half+L+Pkt' },
+  { id: 19, code: 'SEU-15K', name: 'Sesame Oil (Mukil) 15kg Tin', cat: 'Sesame', unit: 'tins', price: 4050, stock: 4, sold: 0, image: 'https://placehold.co/150x150?text=15kg+Tin' },
+  { id: 20, code: 'SEK-15K', name: 'Sesame Oil (Karmegam Premium) 15kg Tin', cat: 'Sesame', unit: 'tins', price: 4560, stock: 5, sold: 0, image: 'https://placehold.co/150x150?text=15kg+Tin' },
+  { id: 21, code: 'SEK-05C', name: 'Sesame Oil (Karmegam) 5L Can', cat: 'Sesame', unit: 'cans', price: 1575, stock: 10, sold: 0, image: 'https://placehold.co/150x150?text=5L+Can' },
+  { id: 22, code: 'SEK-01B', name: 'Sesame Oil (Karmegam) 1L Bottle', cat: 'Sesame', unit: 'bottles', price: 340, stock: 15, sold: 0, image: 'https://placehold.co/150x150?text=1L+Bottle' },
+  { id: 23, code: 'SEK-01P', name: 'Sesame Oil (Karmegam) 1L Packet', cat: 'Sesame', unit: 'pkts', price: 330, stock: 30, sold: 0, image: 'https://placehold.co/150x150?text=1L+Packet' },
+  { id: 24, code: 'SEK-HFB', name: 'Sesame Oil (Karmegam) 1/2L Bottle', cat: 'Sesame', unit: 'bottles', price: 170, stock: 20, sold: 0, image: 'https://placehold.co/150x150?text=Half+L+Btl' },
+  { id: 25, code: 'SEK-HFP', name: 'Sesame Oil (Karmegam) 1/2L Packet', cat: 'Sesame', unit: 'pkts', price: 165, stock: 25, sold: 0, image: 'https://placehold.co/150x150?text=Half+L+Pkt' },
+  { id: 26, code: 'SEK-200B', name: 'Sesame Oil (Karmegam) 200ml Bottle', cat: 'Sesame', unit: 'bottles', price: 70, stock: 15, sold: 0, image: 'https://placehold.co/150x150?text=200ml+Bottle' },
+  { id: 27, code: 'CAS-01B', name: 'Castor Oil 1L Bottle', cat: 'Castor', unit: 'bottles', price: 220, stock: 10, sold: 0, image: 'https://placehold.co/150x150?text=1L+Bottle' },
+  { id: 28, code: 'CAS-HFB', name: 'Castor Oil 1/2L Bottle', cat: 'Castor', unit: 'bottles', price: 110, stock: 15, sold: 0, image: 'https://placehold.co/150x150?text=Half+L+Btl' },
+  { id: 29, code: 'CON-01P', name: 'Coconut Oil 1L Packet', cat: 'Coconut', unit: 'pkts', price: 370, stock: 30, sold: 0, image: 'https://placehold.co/150x150?text=1L+Packet' },
+  { id: 30, code: 'CON-01B', name: 'Coconut Oil 1L Bottle', cat: 'Coconut', unit: 'bottles', price: 370, stock: 20, sold: 0, image: 'https://placehold.co/150x150?text=1L+Bottle' },
+  { id: 31, code: 'CON-HFP', name: 'Coconut Oil 1/2L Packet', cat: 'Coconut', unit: 'pkts', price: 185, stock: 25, sold: 0, image: 'https://placehold.co/150x150?text=Half+L+Pkt' },
+  { id: 32, code: 'CON-HFB', name: 'Coconut Oil 1/2L Bottle', cat: 'Coconut', unit: 'bottles', price: 185, stock: 20, sold: 0, image: 'https://placehold.co/150x150?text=Half+L+Btl' },
+  { id: 33, code: 'CON-200B', name: 'Coconut Oil 200g Bottle', cat: 'Coconut', unit: 'bottles', price: 100, stock: 15, sold: 0, image: 'https://placehold.co/150x150?text=200g+Bottle' },
+  { id: 34, code: 'CON-100B', name: 'Coconut Oil 100g Bottle', cat: 'Coconut', unit: 'bottles', price: 50, stock: 20, sold: 0, image: 'https://placehold.co/150x150?text=100g+Bottle' }
+];
+
+const defaultDb = {
+  products: defaultProducts,
+  bills: [],
+  customers: [],
+  suppliers: [],
+  priceHistory: [],
+  loginLogs: [],
+  accounts: [],
+  settings: {
+    gst: 5,
+    shop: 'Sri Nikil Tradings',
+    addr: '058/1, Bhavani Main Road, Opp. Central Warehouse, Erode - 638004',
+    gstin: '33AMCPD1118L1ZK',
+    fssai: '12424007000946',
+    phone: '94875 81302, 0424 2901803'
+  },
+  billSeq: 1000
+};
+
+function apiUrl(path) {
+  return `${API_BASE_URL}${path}`;
+}
+
+async function apiRequest(path, options = {}) {
+  const response = await fetch(apiUrl(path), {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    },
+    ...options
+  });
+
+  const text = await response.text();
+  const contentType = response.headers.get('content-type') || '';
+  let data = null;
+
+  if (text) {
+    const looksLikeJson = contentType.includes('application/json') || contentType.includes('+json');
+
+    if (looksLikeJson) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = null;
+      }
+    } else {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = null;
+      }
+    }
+  }
+
+  if (!response.ok) {
+    const serverMessage = data?.detail || data?.message || data?.error;
+    const isHtmlResponse = /^\s*<!doctype html/i.test(text) || /^\s*<html/i.test(text);
+    const fallbackMessage = isHtmlResponse
+      ? `API request failed (${response.status}). Backend returned HTML instead of JSON. Check backend server and /api route.`
+      : `Request failed: ${response.status}`;
+
+    throw new Error(serverMessage || fallbackMessage);
+  }
+
+  return data;
+}
+
+function normalizeDb(data) {
+  const merged = { ...defaultDb, ...(data || {}) };
+  const incomingProducts = Array.isArray(merged.products) ? merged.products : defaultProducts;
+  const incomingAccounts = Array.isArray(merged.accounts) ? merged.accounts : defaultDb.accounts;
+  const incomingSettings = Array.isArray(merged.settings)
+    ? (merged.settings[0] || {})
+    : (merged.settings || {});
+
+  const parseBillItems = (rawItems) => {
+    if (Array.isArray(rawItems)) {
+      return rawItems;
+    }
+
+    if (typeof rawItems === 'string') {
+      try {
+        const parsed = JSON.parse(rawItems);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    return [];
+  };
+
+  const getNextBillSequence = (bills) => {
+    const extractedSeq = bills
+      .map((bill) => {
+        const match = String(bill.billNo || bill.bill_no || '').match(/SNT-(\d+)/i);
+        return match ? Number(match[1]) : 0;
+      })
+      .filter((value) => Number.isFinite(value));
+
+    const maxSeq = extractedSeq.length > 0 ? Math.max(...extractedSeq) : 0;
+    return Math.max(defaultDb.billSeq, maxSeq + 1);
+  };
+
+  merged.products = incomingProducts.map((product, index) => ({
+    ...product,
+    price: Number(product.price || 0),
+    stock: Number(product.stock || 0),
+    sold: Number(product.sold || 0),
+    image: product.image || defaultProducts[index]?.image || 'https://placehold.co/150x150?text=Product'
+  }));
+
+  merged.bills = (Array.isArray(merged.bills) ? merged.bills : []).map((bill) => ({
+    ...bill,
+    billNo: bill.billNo || bill.bill_no,
+    by: bill.by || bill.by_user,
+    subtotal: Number(bill.subtotal || 0),
+    cgst: Number(bill.cgst || 0),
+    sgst: Number(bill.sgst || 0),
+    grand: Number(bill.grand || 0),
+    items: parseBillItems(bill.items)
+  }));
+
+  merged.customers = (Array.isArray(merged.customers) ? merged.customers : []).map((customer) => ({
+    ...customer,
+    visits: Number(customer.visits || 0),
+    total: Number(customer.total || 0),
+    firstVisit: customer.firstVisit || customer.lastVisit || null,
+    lastVisit: customer.lastVisit || customer.firstVisit || null
+  }));
+
+
+  merged.purchases = (Array.isArray(merged.purchases) ? merged.purchases : []).map((purchase) => ({
+    ...purchase,
+    qty: Number(purchase.qty || 0),
+    amount: Number(purchase.amount || 0),
+    by: purchase.by || purchase.by_user
+  }));
+
+  merged.refills = (Array.isArray(merged.refills) ? merged.refills : []).map((refill) => ({
+    ...refill,
+    qty: Number(refill.qty || 0),
+    by: refill.by || refill.by_user
+  }));
+
+  const incomingPriceHistory = Array.isArray(merged.priceHistory) ? merged.priceHistory : [];
+  merged.priceHistory = incomingPriceHistory.map((history) => ({
+    ...history,
+    old: Number(history.old ?? history.old_price ?? 0),
+    new: Number(history.new ?? history.new_price ?? 0),
+    by: history.by || history.by_user
+  }));
+
+  merged.loginLogs = (Array.isArray(merged.loginLogs) ? merged.loginLogs : []).map((log) => ({
+    ...log,
+    user: log.user || log.user_name,
+    loginTime: log.loginTime || log.login_time,
+    logoutTime: log.logoutTime || log.logout_time
+  }));
+
+  merged.accounts = incomingAccounts
+    .filter((account) => account && account.user)
+    .map((account) => ({
+      ...account,
+      pass: account.pass || '',
+      role: account.role || (account.user?.toLowerCase() === 'admin' ? 'Admin' : 'Staff')
+    }));
+
+  if (merged.accounts.length === 0) {
+    merged.accounts = defaultDb.accounts;
+  }
+
+  merged.settings = {
+    ...defaultDb.settings,
+    ...incomingSettings,
+    gst: Number(incomingSettings?.gst ?? defaultDb.settings.gst)
+  };
+
+  merged.billSeq = getNextBillSequence(merged.bills);
+
+  return merged;
+}
+
+function makeUniqueBillNo(baseBillNo = '') {
+  const cleaned = String(baseBillNo || '').trim();
+  if (cleaned) {
+    return `${cleaned}-${Date.now().toString().slice(-5)}`;
+  }
+
+  return `SNT-${Date.now()}`;
+}
+
+function loadStoredDb() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved || saved === 'undefined') {
+      return defaultDb;
+    }
+
+    return normalizeDb(JSON.parse(saved));
+  } catch (error) {
+    console.error('Failed to load ERP data, resetting to defaults', error);
+    return defaultDb;
+  }
+}
+
+async function fetchRemoteDb() {
+  return normalizeDb(await apiRequest('/api/db'));
+}
+
+export function useERPData() {
+  const [db, setDb] = useState(() => loadStoredDb());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const refreshData = async () => {
+    setLoading(true);
+
+    try {
+      const remoteDb = await fetchRemoteDb();
+      setDb(remoteDb);
+      setError('');
+      return remoteDb;
+    } catch (refreshError) {
+      console.error('Failed to refresh ERP data', refreshError);
+      setError('Backend data unavailable. Showing local data.');
+      throw refreshError;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshData().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+  }, [db]);
+
+  useEffect(() => {
+    const handleStorage = (event) => {
+      if (event.key !== STORAGE_KEY || !event.newValue) {
+        return;
+      }
+
+      try {
+        setDb(normalizeDb(JSON.parse(event.newValue)));
+      } catch (error) {
+        console.warn('Failed to sync ERP data from another tab', error);
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  const updateDb = (key, value) => {
+    setDb((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const runMutation = async (path, options) => {
+    await apiRequest(path, options);
+    await refreshData();
+  };
+
+  const appendLoginLogLocally = (log) => {
+    const normalizedLog = {
+      id: Number(log.id || Date.now()),
+      user: log.user || log.user_name,
+      role: log.role || 'Staff',
+      loginTime: log.loginTime || log.login_time || new Date().toISOString(),
+      logoutTime: log.logoutTime || log.logout_time || null
+    };
+
+    setDb((prev) => ({
+      ...prev,
+      loginLogs: [normalizedLog, ...(Array.isArray(prev.loginLogs) ? prev.loginLogs : [])]
+    }));
+
+    return normalizedLog;
+  };
+
+  const logoutLoginLogLocally = (id) => {
+    setDb((prev) => ({
+      ...prev,
+      loginLogs: (Array.isArray(prev.loginLogs) ? prev.loginLogs : []).map((log) => (
+        Number(log.id) === Number(id)
+          ? { ...log, logoutTime: new Date().toISOString() }
+          : log
+      ))
+    }));
+  };
+
+  const clearLoginLogsLocally = (roles = []) => {
+    const normalizedRoles = (Array.isArray(roles) ? roles : [])
+      .map((role) => String(role || '').trim().toLowerCase())
+      .filter(Boolean);
+
+    setDb((prev) => ({
+      ...prev,
+      loginLogs: normalizedRoles.length === 0
+        ? []
+        : (Array.isArray(prev.loginLogs) ? prev.loginLogs : []).filter((log) => (
+            !normalizedRoles.includes(String(log.role || '').trim().toLowerCase())
+          ))
+    }));
+  };
+
+
+
+  const appendPurchaseLocally = (purchase) => {
+    const normalizedPurchase = {
+      id: Number(purchase.id || Date.now()),
+      date: purchase.date || new Date().toISOString(),
+      supplier: purchase.supplier || '',
+      product: purchase.product || '',
+      qty: Number(purchase.qty || 0),
+      amount: Number(purchase.amount || 0),
+      by: purchase.by || purchase.by_user || 'staff'
+    };
+
+    setDb((prev) => ({
+      ...prev,
+      purchases: [normalizedPurchase, ...(Array.isArray(prev.purchases) ? prev.purchases : [])],
+      products: (Array.isArray(prev.products) ? prev.products : []).map((product) => (
+        product.name === normalizedPurchase.product
+          ? { ...product, stock: Number(product.stock || 0) + normalizedPurchase.qty }
+          : product
+      )),
+      suppliers: (Array.isArray(prev.suppliers) ? prev.suppliers : []).map((supplier) => (
+        supplier.name === normalizedPurchase.supplier
+          ? { ...supplier, total: Number(supplier.total || 0) + normalizedPurchase.amount }
+          : supplier
+      ))
+    }));
+
+    return normalizedPurchase;
+  };
+
+  const deleteBillLocally = (id) => {
+    setDb((prev) => {
+      const existingBills = Array.isArray(prev.bills) ? prev.bills : [];
+      const billToDelete = existingBills.find((bill) => Number(bill.id) === Number(id));
+
+      if (!billToDelete) {
+        return prev;
+      }
+
+      const updatedProducts = (Array.isArray(prev.products) ? prev.products : []).map((product) => {
+        const matchedItem = (Array.isArray(billToDelete.items) ? billToDelete.items : []).find(
+          (item) => Number(item.id) === Number(product.id)
+        );
+
+        if (!matchedItem) {
+          return product;
+        }
+
+        return {
+          ...product,
+          stock: Number(product.stock || 0) + Number(matchedItem.qty || 0),
+          sold: Math.max(0, Number(product.sold || 0) - Number(matchedItem.qty || 0))
+        };
+      });
+
+      const updatedCustomers = (Array.isArray(prev.customers) ? prev.customers : []).flatMap((customer) => {
+        if (customer.phone !== billToDelete.phone) {
+          return [customer];
+        }
+
+        const nextVisits = Math.max(0, Number(customer.visits || 0) - 1);
+        const nextTotal = Math.max(0, Number(customer.total || 0) - Number(billToDelete.grand || 0));
+
+        if (nextVisits === 0) {
+          return [];
+        }
+
+        return [{
+          ...customer,
+          visits: nextVisits,
+          total: nextTotal
+        }];
+      });
+
+      return {
+        ...prev,
+        bills: existingBills.filter((bill) => Number(bill.id) !== Number(id)),
+        products: updatedProducts,
+        customers: updatedCustomers
+      };
+    });
+  };
+
+  const clearRefillsLocally = () => {
+    setDb((prev) => ({
+      ...prev,
+      refills: []
+    }));
+  };
+
+  const clearBillsLocally = () => {
+    setDb((prev) => ({
+      ...prev,
+      bills: [],
+      customers: [],
+      products: (Array.isArray(prev.products) ? prev.products : []).map((product) => {
+        const soldQty = Number(product.sold || 0);
+        return {
+          ...product,
+          stock: Number(product.stock || 0) + soldQty,
+          sold: 0
+        };
+      })
+    }));
+  };
+
+  const clearCustomersLocally = () => {
+    setDb((prev) => ({
+      ...prev,
+      customers: []
+    }));
+  };
+
+  const clearPriceHistoryLocally = () => {
+    setDb((prev) => ({
+      ...prev,
+      priceHistory: []
+    }));
+  };
+
+  const updateSettingsLocally = (settings) => {
+    const normalizedSettings = {
+      ...defaultDb.settings,
+      ...(settings || {}),
+      gst: Number(settings?.gst ?? defaultDb.settings.gst)
+    };
+
+    setDb((prev) => ({
+      ...prev,
+      settings: normalizedSettings
+    }));
+
+    return normalizedSettings;
+  };
+
+  return {
+    db,
+    loading,
+    error,
+    refreshData,
+    updateDb,
+    restoreDatabase: (data) => setDb(normalizeDb(data)),
+    login: async (user, password) => {
+      try {
+        return await apiRequest('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ user, password })
+        });
+      } catch (loginError) {
+        console.warn('Failed to authenticate with backend', loginError);
+        throw loginError;
+      }
+    },
+    addProduct: (product) => runMutation('/api/products', {
+      method: 'POST',
+      body: JSON.stringify({
+        code: product.code || '',
+        name: product.name,
+        cat: product.cat,
+        unit: product.unit,
+        price: Number(product.price),
+        stock: Number(product.stock || 0),
+        image: product.image || null
+      })
+    }),
+    deleteProduct: (id) => runMutation(`/api/products/${id}`, { method: 'DELETE' }),
+    addBill: async (bill) => {
+      const payload = {
+        billNo: bill.billNo || makeUniqueBillNo(),
+        customer: bill.customer,
+        phone: bill.phone,
+        payment: bill.payment,
+        items: bill.items,
+        date: bill.date || new Date().toISOString(),
+        subtotal: Number(bill.subtotal),
+        cgst: Number(bill.cgst),
+        sgst: Number(bill.sgst),
+        grand: Number(bill.grand),
+        by_user: bill.by || bill.by_user
+      };
+
+      try {
+        await runMutation('/api/bills', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      } catch {
+        const retryPayload = {
+          ...payload,
+          billNo: makeUniqueBillNo(payload.billNo)
+        };
+
+        try {
+          await runMutation('/api/bills', {
+            method: 'POST',
+            body: JSON.stringify(retryPayload)
+          });
+        } catch (retryError) {
+          console.warn('Failed to save bill to backend', retryError);
+          throw retryError;
+        }
+      }
+    },
+    deleteBill: async (id) => {
+      try {
+        await runMutation(`/api/bills/${id}`, { method: 'DELETE' });
+      } catch (mutationError) {
+        console.warn('Failed to delete bill in backend, deleting locally instead', mutationError);
+        deleteBillLocally(id);
+      }
+    },
+    clearBills: async () => {
+      try {
+        await runMutation('/api/bills', { method: 'DELETE' });
+      } catch (mutationError) {
+        console.warn('Failed to clear bills in backend, clearing locally instead', mutationError);
+        clearBillsLocally();
+      }
+    },
+    addPurchase: async (purchase) => {
+      try {
+        await runMutation('/api/purchases', {
+          method: 'POST',
+          body: JSON.stringify({
+            supplier: purchase.supplier,
+            product: purchase.product,
+            qty: Number(purchase.qty),
+            amount: Number(purchase.amount),
+            by_user: purchase.by || purchase.by_user
+          })
+        });
+      } catch (mutationError) {
+        console.warn('Failed to save purchase to backend, storing locally instead', mutationError);
+        appendPurchaseLocally(purchase);
+      }
+    },
+    updateProductPrice: (id, newPrice, userName) => runMutation(`/api/products/${id}/price`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        new_price: Number(newPrice),
+        by_user: userName
+      })
+    }),
+    deletePriceHistory: (id) => runMutation(`/api/price-history/${id}`, { method: 'DELETE' }),
+    clearPriceHistory: async () => {
+      try {
+        await runMutation('/api/price-history', { method: 'DELETE' });
+      } catch (mutationError) {
+        console.warn('Failed to clear price history in backend, clearing locally instead', mutationError);
+        clearPriceHistoryLocally();
+      }
+    },
+    addRefill: async (refill) => {
+      await runMutation('/api/refills', {
+        method: 'POST',
+        body: JSON.stringify({
+          product: refill.product,
+          qty: Number(refill.qty),
+          by_user: refill.by || refill.by_user
+        })
+      });
+    },
+    deleteRefill: (id) => runMutation(`/api/refills/${id}`, { method: 'DELETE' }),
+    clearRefills: async () => {
+      try {
+        await runMutation('/api/refills', { method: 'DELETE' });
+      } catch (mutationError) {
+        console.warn('Failed to clear refills in backend, clearing locally instead', mutationError);
+        clearRefillsLocally();
+      }
+    },
+    addLoginLog: async (log) => {
+      try {
+        return await apiRequest('/api/login-logs', {
+          method: 'POST',
+          body: JSON.stringify({
+            user_name: log.user || log.user_name,
+            role: log.role,
+            login_time: log.loginTime || log.login_time
+          })
+        });
+      } catch (logError) {
+        console.warn('Failed to save login log to backend, storing locally instead', logError);
+        return appendLoginLogLocally(log);
+      }
+    },
+    updateLoginLog: async (id) => {
+      try {
+        return await apiRequest(`/api/login-logs/${id}/logout`, { method: 'PUT' });
+      } catch (logError) {
+        console.warn('Failed to update login log in backend, updating locally instead', logError);
+        logoutLoginLogLocally(id);
+        return { id };
+      }
+    },
+    startShift: async ({ user, role, shiftStart }) => {
+      return apiRequest('/api/shifts/start', {
+        method: 'POST',
+        body: JSON.stringify({
+          user,
+          role,
+          shiftStart: shiftStart || new Date().toISOString()
+        })
+      });
+    },
+    endShift: async ({ user, role, sessionId, shiftStart, recipientEmail }) => {
+      return apiRequest('/api/shifts/end', {
+        method: 'POST',
+        body: JSON.stringify({
+          user,
+          role,
+          sessionId,
+          shiftStart,
+          recipientEmail
+        })
+      });
+    },
+    deleteLoginLog: (id) => runMutation(`/api/login-logs/${id}`, { method: 'DELETE' }),
+    clearLoginLogs: async ({ roles = [] } = {}) => {
+      const normalizedRoles = (Array.isArray(roles) ? roles : [])
+        .map((role) => String(role || '').trim())
+        .filter(Boolean);
+      const query = normalizedRoles.length > 0
+        ? `?roles=${encodeURIComponent(normalizedRoles.join(','))}`
+        : '';
+
+      try {
+        await runMutation(`/api/login-logs${query}`, { method: 'DELETE' });
+      } catch (logError) {
+        console.warn('Failed to clear login logs in backend, clearing locally instead', logError);
+        clearLoginLogsLocally(normalizedRoles);
+      }
+    },
+    clearCustomers: async () => {
+      try {
+        await runMutation('/api/customers', { method: 'DELETE' });
+      } catch (mutationError) {
+        console.warn('Failed to clear customers in backend, clearing locally instead', mutationError);
+        clearCustomersLocally();
+      }
+    },
+    updateSettings: async (settings) => {
+      try {
+        await runMutation('/api/settings', {
+          method: 'PUT',
+          body: JSON.stringify({
+            gst: Number(settings.gst || 0),
+            shop: settings.shop || '',
+            addr: settings.addr || '',
+            gstin: settings.gstin || '',
+            fssai: settings.fssai || '',
+            phone: settings.phone || ''
+          })
+        });
+      } catch (mutationError) {
+        console.warn('Failed to update settings in backend, updating locally instead', mutationError);
+        updateSettingsLocally(settings);
+      }
+    },
+    addStaff: (account) => runMutation('/api/accounts', {
+      method: 'POST',
+      body: JSON.stringify({
+        user: account.user,
+        password: account.pass,
+        role: account.role
+      })
+    }),
+    deleteStaff: (username) => runMutation(`/api/accounts/${encodeURIComponent(username)}`, {
+      method: 'DELETE'
+    }),
+    updateStaffPassword: async (username, password) => {
+      await apiRequest(`/api/accounts/${encodeURIComponent(username)}/password`, {
+        method: 'PUT',
+        body: JSON.stringify({ password: String(password || '') })
+      });
+    }
+  };
+}
