@@ -44,10 +44,10 @@ Replace `paste-16-char-app-password-here` with your generated password:
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=anithaami1208@gmail.com
+SMTP_USER=karthickkumar2312@gmail.com
 SMTP_PASS=YOUR_16_CHAR_PASSWORD_NO_SPACES
-SMTP_FROM=anithaami1208@gmail.com
-SHIFT_REPORT_EMAIL=anithaami1208@gmail.com
+SMTP_FROM=karthickkumar2312@gmail.com
+SHIFT_REPORT_EMAIL=karthickkumar2312@gmail.com
 ```
 
 #### Step 4: Restart Server
@@ -161,9 +161,9 @@ After staff clicks "End Shift":
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=anithaami1208@gmail.com
+SMTP_USER=karthickkumar2312@gmail.com
 SMTP_PASS=YOUR_16_CHAR_APP_PASSWORD
-SMTP_FROM=anithaami1208@gmail.com
+SMTP_FROM=karthickkumar2312@gmail.com
 
 # Report destination
 SHIFT_REPORT_EMAIL=anithaami1208@gmail.com
