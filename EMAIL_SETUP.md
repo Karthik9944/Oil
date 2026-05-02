@@ -24,10 +24,10 @@
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=587
    SMTP_SECURE=false
-   SMTP_USER=anithaami1208@gmail.com
+   SMTP_USER=karthickkumar2312@gmail.com
    SMTP_PASS=xxxx xxxx xxxx xxxx
-   SMTP_FROM=anithaami1208@gmail.com
-   SHIFT_REPORT_EMAIL=anithaami1208@gmail.com
+   SMTP_FROM=karthickkumar2312@gmail.com
+   SHIFT_REPORT_EMAIL=karthickkumar2312@gmail.com
    ```
 
 ### Option 2: Using Other Email Services
@@ -71,7 +71,7 @@ If emails don't send:
   "user": "staff1",
   "role": "Staff",
   "shiftStart": "2026-04-10T09:00:00",
-  "recipientEmail": "anithaami1208@gmail.com"
+  "recipientEmail": "karthickkumar2312@gmail.com"
 }
 ```
 
@@ -79,7 +79,7 @@ Response:
 ```json
 {
   "success": true,
-  "emailedTo": "anithaami1208@gmail.com",
+  "emailedTo": "karthickkumar2312@gmail.com",
   "billsCount": 5,
   "totalSalesAmount": 2500.00
 }
